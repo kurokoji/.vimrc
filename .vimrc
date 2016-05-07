@@ -25,19 +25,19 @@ set nobackup                        "~の作成無効化
 set writebackup                     "上書き成功時に~を削除
 set clipboard+=unnamed,autoselect   "クリップボードを共有
  
-"** 文字コード **
+"** 文字コード設定 **
 set encoding=utf-8                  "vim
 set fileencodings=utf-8,iso-2022-jp,cp932,sjis,euc-jp "保存するファイル
 set fencs=utf-8,iso-2022-jp,enc-jp,cp932  "開くファイル
 
-"** 表示 **
+"** 表示設定 **
 syntax enable                       "ハイライト表示
 set title                           "タイトル
 set number                          "行番号
 set cursorline                      "カーソルラインの表示
 set cursorcolumn
 
-"** カラースキーマ **
+"** カラースキーマ設定 **
 set t_Co=256
 "colorscheme molokai
 "colorscheme solarized
