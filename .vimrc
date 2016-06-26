@@ -1,4 +1,4 @@
-map ^[OA <Up>
+imap ^[OA <Up>
 imap ^[OB <Down>
 imap ^[OC <Right>
 imap ^[OD <Left>
@@ -42,12 +42,13 @@ set cursorcolumn
 
 "** カラースキーマ設定 **
 set t_Co=256
+"colorscheme colorsbox-stnight
 "colorscheme elflord
 "colorscheme torte
-"colorscheme molokai
+colorscheme molokai
 "colorscheme solarized
-colorscheme hybrid
-"let g:molokai_original=1
+"colorscheme hybrid
+let g:molokai_original=1
 set background=dark
 
 set tabstop=2                       "タブ文字幅
@@ -59,6 +60,6 @@ set cindent
 
 "** ファイル別設定 **
 filetype on
-autocmd BufNewFile *.cpp 0r $HOME/.vim/template/cpp.cpp
+autocmd BufNewFile *.cpp 0r $HOME/Dropbox/kurokoji/template/cpp.cpp
 autocmd FileType c,cpp,perl,html set cindent
 
