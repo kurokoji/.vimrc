@@ -1,3 +1,23 @@
+" dein.vim{{{
+if &compatible
+  set nocompatible
+endif
+set runtimepath^=~/.vim/dein/repos/github.com/Shougo/dein.vim
+
+call dein#begin(expand('~/.vim/dein'))
+
+call dein#add('Shougo/dein.vim')
+call dein#add('Shougo/vimproc.vim', {'build' : 'make'})
+
+call dein#add('Shougo/neocomplete.vim')
+call dein#add('Shougo/neomru.vim')
+call dein#add('Shougo/neosnippet')
+call dein#add('Shougo/unite.vim')
+call dein#add('Townk/vim-autoclose')
+
+call dein#end()
+"}}}
+
 imap ^[OA <Up>
 imap ^[OB <Down>
 imap ^[OC <Right>
@@ -5,18 +25,14 @@ imap ^[OD <Left>
 set backspace=indent,eol,start "Backspaceを調整
 
 "** 代わりにする **
-imap <C-j> <esc>
+inoremap <C-j> <esc>
 
 "** ペーストするときにインデントさせない **
-imap <F5> <nop>
+inoremap <F5> <nop>
 set pastetoggle=<F5>
 
 "** 括弧補完 **
-inoremap { {}<Left>
 inoremap {<Enter> {}<Left><CR><ESC><S-o>
-
-"inoremap ( ()<ESC>i
-"inoremap (<Enter> ()<Left><CR><ESC><S-o>
 
 "** システム設定 **
 set nocompatible
@@ -39,24 +55,20 @@ set title                           "タイトル
 set number                          "行番号
 set cursorline                      "カーソルラインの表示
 set cursorcolumn
+set list
+set listchars=tab:»-,eol:¬,extends:»,precedes:«,nbsp:%
 
 "** カラースキーマ設定 **
 set t_Co=256
-"colorscheme colorsbox-stnight
-"colorscheme elflord
-"colorscheme torte
 colorscheme molokai
-"colorscheme solarized
 "colorscheme hybrid
 let g:molokai_original=1
 set background=dark
 
 set tabstop=2                       "タブ文字幅
 set shiftwidth=2                    "インデント幅
-"set noexpandtab                     "挿入モードでタブ文字有効
 set expandtab                       "タブにスペースを使う
 set cindent
-"set smarttab
 
 "** ファイル別設定 **
 filetype on
