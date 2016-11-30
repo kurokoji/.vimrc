@@ -22,22 +22,52 @@ call dein#add('davidhalter/jedi-vim')
 call dein#add('itchyny/lightline.vim')
 call dein#add('Yggdroot/indentLine')
 call dein#add('justmao945/vim-clang')
-call dein#add('vim-template')
+call dein#add('thinca/vim-template')
+call dein#add('airblade/vim-gitgutter')
+call dein#add('tpope/vim-fugitive')
+call dein#add('marijnh/tern_for_vim', {'bulid' : 'make'})
+"call dein#add('MetalPhaeton/easybracket-vim')
+call dein#add('vim-scripts/Smooth-Scroll')
+
+" colorscheme
+call dein#add('tomasr/molokai')
+call dein#add('altercation/vim-colors-solarized')
+call dein#add('jeffreyiacono/vim-colors-wombat')
+
+" lightline-color
+call dein#add('ClaudiaJ/lightline-molokai.vim')
 
 call dein#end()
 "}}}
 
 " 'Shougo/neocomplete' {{{
+let g:neocomplete#force_overwrite_completefunc = 1
 let g:neocomplete#enable_at_startup = 1
-
+let g:neocomplete#enable_smart_case = 1
 if !exists('g:neocomplete#force_omni_input_patterns')
   let g:neocomplete#force_omni_input_patterns = {} 
 endif
-let g:neocomplete#force_overwrite_completefunc = 1
 let g:neocomplete#force_omni_input_patterns.c =
       \ '[^.[:digit:] *\t]\%(\.\|->\)\w*'
 let g:neocomplete#force_omni_input_patterns.cpp =
       \ '[^.[:digit:] *\t]\%(\.\|->\)\w*\|\h\w*::\w*'
+
+augroup cpp-path
+  autocmd!
+  autocmd FileType cpp setlocal path=.,/usr/lib/gcc/x86_64-pc-cygwin/5.4.0/include/c++,/usr/lib/boost/../
+augroup END
+
+" include-path
+let g:neocomplete#include_paths = {
+  \ 'cpp' : '.',
+  \ }
+
+let g:neocomplete#include_patterns = {
+  \ 'cpp' : '^\s*#\s*include',
+  \}
+
+inoremap <expr><TAB> pumvisible() ? "\<C-n>" : "\<TAB>"
+"inoremap <expr><CR>  pumvisible() ? neocomplete#close_popup() : "<CR>"
 
 " }}}
 " 'Shougo/neosnippet' {{{ 
@@ -47,34 +77,170 @@ smap <C-k>     <Plug>(neosnippet_expand_or_jump)
 xmap <C-k>     <Plug>(neosnippet_expand_target)
  
 " SuperTab like snippets behavior.
-imap <expr><TAB> neosnippet#expandable_or_jumpable() ?
-\ "\<Plug>(neosnippet_expand_or_jump)"
-\: pumvisible() ? "\<C-n>" : "\<TAB>"
-smap <expr><TAB> neosnippet#expandable_or_jumpable() ?
-\ "\<Plug>(neosnippet_expand_or_jump)"
-\: "\<TAB>"
+"imap <expr><TAB> neosnippet#expandable_or_jumpable() ?
+"\ "\<Plug>(neosnippet_expand_or_jump)"
+"\: pumvisible() ? "\<C-n>" : "\<TAB>"
+"smap <expr><TAB> neosnippet#expandable_or_jumpable() ?
+"\ "\<Plug>(neosnippet_expand_or_jump)"
+"\: "\<TAB>"
  
 " For snippet_complete marker.
 if has('conceal')
   set conceallevel=2 concealcursor=i
 endif
 
+let g:neosnippet#snippets_directory='~/.vim/dein/repos/github.com/Shougo/neosnippet-snippets/snippets/'
+
 "}}}
 " 'davidhalter/jedi-vim' {{{
 autocmd FileType python setlocal omnifunc=jedi#completions
 autocmd FileType python setlocal completeopt-=preview
-let g:jedi#auto_vim_configuration = 0
-
+let g:jedi#force_py_version=3
+let g:jedi#auto_vim_configuration = 1
 if !exists('g:neocomplete#force_omni_input_patterns')
   let g:neocomplete#force_omni_input_patterns = {}
 endif
 
 let g:neocomplete#force_omni_input_patterns.python = '\h\w*\|[^. \t]\.\w*'
 " }}}
+" 'airblade/vim-gitgutter' {{{
+"let g:gitgutter_sign_added = '✚'
+"let g:gitgutter_sign_modified = '➜'
+"let g:gitgutter_sign_removed = '✘'
+
+" }}}
 " 'itchyny/lightline' {{{
 let g:lightline = {
-  \ 'colorscheme': 'solarized'
+  \ 'colorscheme': 'solarized',
+  \ 'mode_map': {'c': 'NORMAL'},
+  \ 'active': {
+  \   'left': [
+  \     ['mode', 'paste'],
+  \     ['fugitive', 'gitgutter', 'filename'],
+  \   ],
+  \   'right': [
+  \     ['lineinfo', 'syntastic'],
+  \     ['percent'],
+  \     ['charcode', 'fileformat', 'fileencoding', 'filetype'],
+  \   ]
+  \ },
+  \ 'component_function': {
+  \   'modified': 'MyModified',
+  \   'readonly': 'MyReadonly',
+  \   'fugitive': 'MyFugitive',
+  \   'filename': 'MyFilename',
+  \   'fileformat': 'MyFileformat',
+  \   'filetype': 'MyFiletype',
+  \   'fileencoding': 'MyFileencoding',
+  \   'mode': 'MyMode',
+  \   'syntastic': 'SyntasticStatuslineFlag',
+  \   'charcode': 'MyCharCode',
+  \   'gitgutter': 'MyGitGutter',
+  \ },
+  \ 'separator': {'left': '⮀', 'right': '⮂'},
+  \ 'subseparator': {'left': '⮁', 'right': '⮃'}
   \ }
+
+function! MyModified()
+  return &ft =~ 'help\|vimfiler\|gundo' ? '' : &modified ? '+' : &modifiable ? '' : '-'
+endfunction
+
+function! MyReadonly()
+  return &ft !~? 'help\|vimfiler\|gundo' && &ro ? '⭤' : ''
+endfunction
+
+function! MyFilename()
+  return ('' != MyReadonly() ? MyReadonly() . ' ' : '') .
+        \ (&ft == 'vimfiler' ? vimfiler#get_status_string() :
+        \  &ft == 'unite' ? unite#get_status_string() :
+        \  &ft == 'vimshell' ? substitute(b:vimshell.current_dir,expand('~'),'~','') :
+        \ '' != expand('%:t') ? expand('%:t') : '[No Name]') .
+        \ ('' != MyModified() ? ' ' . MyModified() : '')
+endfunction
+
+function! MyFugitive()
+  try
+    if &ft !~? 'vimfiler\|gundo' && exists('*fugitive#head')
+      let _ = fugitive#head()
+      return strlen(_) ? '⭠ '._ : ''
+    endif
+  catch
+  endtry
+  return ''
+endfunction
+
+function! MyFileformat()
+  return winwidth('.') > 70 ? &fileformat : ''
+endfunction
+
+function! MyFiletype()
+  return winwidth('.') > 70 ? (strlen(&filetype) ? &filetype : 'no ft') : ''
+endfunction
+
+function! MyFileencoding()
+  return winwidth('.') > 70 ? (strlen(&fenc) ? &fenc : &enc) : ''
+endfunction
+
+function! MyMode()
+  return winwidth('.') > 60 ? lightline#mode() : ''
+endfunction
+
+function! MyGitGutter()
+  if ! exists('*GitGutterGetHunkSummary')
+        \ || ! get(g:, 'gitgutter_enabled', 0)
+        \ || winwidth('.') <= 90
+    return ''
+  endif
+  let symbols = [
+        \ g:gitgutter_sign_added . ' ',
+        \ g:gitgutter_sign_modified . ' ',
+        \ g:gitgutter_sign_removed . ' '
+        \ ]
+  let hunks = GitGutterGetHunkSummary()
+  let ret = []
+  for i in [0, 1, 2]
+    if hunks[i] > 0
+      call add(ret, symbols[i] . hunks[i])
+    endif
+  endfor
+  return join(ret, ' ')
+endfunction
+
+" https://github.com/Lokaltog/vim-powerline/blob/develop/autoload/Powerline/Functions.vim
+function! MyCharCode()
+  if winwidth('.') <= 70
+    return ''
+  endif
+
+  " Get the output of :ascii
+  redir => ascii
+  silent! ascii
+  redir END
+
+  if match(ascii, 'NUL') != -1
+    return 'NUL'
+  endif
+
+  " Zero pad hex values
+  let nrformat = '0x%02x'
+
+  let encoding = (&fenc == '' ? &enc : &fenc)
+
+  if encoding == 'utf-8'
+    " Zero pad with 4 zeroes in unicode files
+    let nrformat = '0x%04x'
+  endif
+
+  " Get the character and the numeric value from the return value of :ascii
+  " This matches the two first pieces of the return value, e.g.
+  " "<F>  70" => char: 'F', nr: '70'
+  let [str, char, nr; rest] = matchlist(ascii, '\v\<(.{-1,})\>\s*([0-9]+)')
+
+  " Format the numeric value
+  let nr = printf(nrformat, nr)
+
+  return "'". char ."' ". nr
+endfunction
 
 " }}}
 " 'Yggdroot/indentLine' {{{
@@ -96,7 +262,20 @@ let g:clang_use_library = 1
 let g:clang_c_completeopt = 'menuone'
 let g:clang_cpp_completeopt = 'menuone'
 let g:clang_exec = 'clang'
-let g:clang_cpp_options = '-std=c++11 -I/usr/include/c++/5.4.0'
+let g:clang_c_options = '-std=c11'
+"let g:clang_cpp_options = '-std=c++11 -I/usr/lib/gcc/x86_64-pc-cygwin/5.4.0/include/c++ -I/usr/lib/boost/../'
+let g:clang_cpp_options = '-std=c++11 -I/usr/lib/gcc/x86_64-pc-cygwin/5.4.0/include/c++'
+"setlocal path+=/usr/lib/gcc/x86_64-pc-cygwin/5.3.0/include/c++/x86_64-pc-cygwin/
+"setlocal path+=/usr/lib/gcc/x86_64-pc-cygwin/5.3.0/include/c++/backward/
+"setlocal path+=/usr/lib/gcc/x86_64-pc-cygwin/5.3.0/include/
+"setlocal path+=/usr/lib/boost/../
+
+" }}}
+" 'thinca/vim-template' {{{
+autocmd User plugin-template-loaded
+    \    if search('<+CURSOR+>')
+    \  |   execute 'normal! "_da>'
+    \  | endif"
 " }}}
 
 imap ^[OA <Up>
@@ -117,9 +296,10 @@ set nocompatible
 set noswapfile                      "swpの作成無効化
 set nobackup                        "~の作成無効化
 set writebackup                     "上書き成功時に~を削除
-set clipboard+=unnamed,autoselect   "クリップボードを共有
+"set clipboard=unnamed,autoselect  "クリップボードを共有
 set infercase
 set autoread
+set nowrap                          "折り返ししない
 
 "** 折りたたみ **
 set foldmethod=marker
@@ -153,10 +333,15 @@ set background=dark
 set tabstop=2                       "タブ文字幅
 set shiftwidth=2                    "インデント幅
 set expandtab                       "タブにスペースを使う
-set cindent
+set smartindent
 let g:python_highlight_all = 1
+language en_US.UTF-8
 
 "** ファイル別設定 **
 filetype on
-autocmd BufNewFile *.cpp 0r $HOME/Dropbox/kurokoji/template/cpp.cpp
-autocmd FileType c,cpp,perl,html,python set cindent
+filetype plugin indent on
+"autocmd BufNewFile *.cpp 0r $HOME/Dropbox/kurokoji/template/cpp.cpp
+autocmd FileType python set tabstop=4 shiftwidth=4 expandtab
+autocmd FileType python set smartindent cinwords=if,elif,else,for,while,try,except,finally,def,class
+autocmd FileType javascript setlocal omnifunc=tern#Complete
+autocmd FileType c,cpp set cindent cinoptions+=:0,g0
