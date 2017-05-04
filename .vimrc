@@ -17,29 +17,32 @@ call dein#add('Shougo/unite.vim')
 call dein#add('Shougo/neoinclude.vim')
 call dein#add('Shougo/vimfiler')
 call dein#add('Shougo/vimshell.vim')
-call dein#add('kana/vim-smartinput')
 call dein#add('davidhalter/jedi-vim')
+call dein#add('kana/vim-smartinput')
 call dein#add('itchyny/lightline.vim')
 call dein#add('Yggdroot/indentLine')
 call dein#add('justmao945/vim-clang')
-call dein#add('thinca/vim-template')
 call dein#add('airblade/vim-gitgutter')
 call dein#add('tpope/vim-fugitive')
-call dein#add('marijnh/tern_for_vim', {'bulid' : 'make'})
-"call dein#add('MetalPhaeton/easybracket-vim')
-call dein#add('vim-scripts/Smooth-Scroll')
+call dein#add('scrooloose/nerdtree')
+call dein#add('jelera/vim-javascript-syntax')
+call dein#add('mattn/sonictemplate-vim')
 
 " colorscheme
-call dein#add('tomasr/molokai')
 call dein#add('altercation/vim-colors-solarized')
-call dein#add('jeffreyiacono/vim-colors-wombat')
-
-" lightline-color
-call dein#add('ClaudiaJ/lightline-molokai.vim')
+call dein#add('itchyny/landscape.vim')
+call dein#add('tomasr/molokai')
 
 call dein#end()
 "}}}
 
+" 'kana/vim-smartinput' {{{
+
+call smartinput#map_to_trigger('i', '<Plug>(smartinput_CR)', '<Enter>', '<Enter>')
+call smartinput#map_to_trigger('i', '<Plug>(smartinput_C-h)', '<BS>', '<C-h>')
+call smartinput#map_to_trigger('i', '<Plug>(smartinput_BS)', '<BS>', '<BS>')
+
+" }}}
 " 'Shougo/neocomplete' {{{
 let g:neocomplete#force_overwrite_completefunc = 1
 let g:neocomplete#enable_at_startup = 1
@@ -52,9 +55,10 @@ let g:neocomplete#force_omni_input_patterns.c =
 let g:neocomplete#force_omni_input_patterns.cpp =
       \ '[^.[:digit:] *\t]\%(\.\|->\)\w*\|\h\w*::\w*'
 
+
 augroup cpp-path
-  autocmd!
-  autocmd FileType cpp setlocal path=.,/usr/lib/gcc/x86_64-pc-cygwin/5.4.0/include/c++,/usr/lib/boost/../
+    autocmd!
+    autocmd FileType cpp setlocal path=.,/usr/local/Cellar/gcc/6.3.0_1/include/c++/6.3.0/x86_64-apple-darwin16.3.0,/usr/local/Cellar/gcc/6.3.0_1/include/c++/6.3.0,/usr/local/cellar/boost/1.63.0/include
 augroup END
 
 " include-path
@@ -66,8 +70,10 @@ let g:neocomplete#include_patterns = {
   \ 'cpp' : '^\s*#\s*include',
   \}
 
-inoremap <expr><TAB> pumvisible() ? "\<C-n>" : "\<TAB>"
-"inoremap <expr><CR>  pumvisible() ? neocomplete#close_popup() : "<CR>"
+imap <expr><TAB> pumvisible() ? "\<C-n>" : "\<TAB>"
+imap <expr><CR>  pumvisible() ? neocomplete#close_popup() : "\<Plug>(smartinput_CR)"
+imap <expr><C-h> neocomplete#smart_close_popup()
+"imap <expr><BS> pumvisible() ? neocomplete#smart_close_popup() : "\<Plug>(smartinput_BS)"
 
 " }}}
 " 'Shougo/neosnippet' {{{ 
@@ -110,6 +116,7 @@ let g:neocomplete#force_omni_input_patterns.python = '\h\w*\|[^. \t]\.\w*'
 
 " }}}
 " 'itchyny/lightline' {{{
+let g:Powerline_symbols='fancy'
 let g:lightline = {
   \ 'colorscheme': 'solarized',
   \ 'mode_map': {'c': 'NORMAL'},
@@ -137,8 +144,8 @@ let g:lightline = {
   \   'charcode': 'MyCharCode',
   \   'gitgutter': 'MyGitGutter',
   \ },
-  \ 'separator': {'left': '⮀', 'right': '⮂'},
-  \ 'subseparator': {'left': '⮁', 'right': '⮃'}
+  \ 'separator': {'left': "\u2b80", 'right': "\u2b82"},
+  \ 'subseparator': {'left': "\u2b81", 'right': "\u2b83"}
   \ }
 
 function! MyModified()
@@ -146,7 +153,7 @@ function! MyModified()
 endfunction
 
 function! MyReadonly()
-  return &ft !~? 'help\|vimfiler\|gundo' && &ro ? '⭤' : ''
+  return &ft !~? 'help\|vimfiler\|gundo' && &ro ? "\u2b64" : ''
 endfunction
 
 function! MyFilename()
@@ -162,7 +169,7 @@ function! MyFugitive()
   try
     if &ft !~? 'vimfiler\|gundo' && exists('*fugitive#head')
       let _ = fugitive#head()
-      return strlen(_) ? '⭠ '._ : ''
+      return strlen(_) ? "\u2b60 "._ : ''
     endif
   catch
   endtry
@@ -262,30 +269,35 @@ let g:clang_use_library = 1
 let g:clang_c_completeopt = 'menuone'
 let g:clang_cpp_completeopt = 'menuone'
 let g:clang_exec = 'clang'
+let g:clang_format_exec = 'clang-format'
 let g:clang_c_options = '-std=c11'
 "let g:clang_cpp_options = '-std=c++11 -I/usr/lib/gcc/x86_64-pc-cygwin/5.4.0/include/c++ -I/usr/lib/boost/../'
-let g:clang_cpp_options = '-std=c++11 -I/usr/lib/gcc/x86_64-pc-cygwin/5.4.0/include/c++'
-"setlocal path+=/usr/lib/gcc/x86_64-pc-cygwin/5.3.0/include/c++/x86_64-pc-cygwin/
-"setlocal path+=/usr/lib/gcc/x86_64-pc-cygwin/5.3.0/include/c++/backward/
-"setlocal path+=/usr/lib/gcc/x86_64-pc-cygwin/5.3.0/include/
+let g:clang_cpp_options = '-std=c++14 -stdlib=libc++ -I/usr/local/Cellar/gcc/6.3.0_1/include/c++/6.3.0/x86_64-apple-darwin16.3.0/ -I/usr/local/Cellar/gcc/6.3.0_1/include/c++/6.3.0 -I/usr/local/cellar/boost/1.63.0/include'
 "setlocal path+=/usr/lib/boost/../
 
 " }}}
-" 'thinca/vim-template' {{{
-autocmd User plugin-template-loaded
-    \    if search('<+CURSOR+>')
-    \  |   execute 'normal! "_da>'
-    \  | endif"
+" 'scrooloose/nerdtree' {{{
+let g:NERDTreeShowBookmarks=1
+let g:NERDTreeDirArrows = 1
+"let g:NERDTreeDirArrowExpandable  = '>'
+"let g:NERDTreeDirArrowCollapsible = '⇩'
+autocmd StdinReadPre * let s:std_in=1
+autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
+" }}}
+" 'mattn/sonictemplate-vim' {{{
+let g:sonictemplate_vim_template_dir = [
+      \ '~/.vim/template'
+      \]
+
+" }}}
+" function {{{
 " }}}
 
-imap ^[OA <Up>
-imap ^[OB <Down>
-imap ^[OC <Right>
-imap ^[OD <Left>
 set backspace=indent,eol,start "Backspaceを調整
 
 "** 代わりにする **
 inoremap <C-j> <esc>
+"inoremap <silent> jj <esc>
 
 "** ペーストするときにインデントさせない **
 inoremap <F5> <nop>
@@ -311,6 +323,7 @@ set fencs=utf-8,iso-2022-jp,enc-jp,cp932  "開くファイル
 
 "** 表示設定 **
 syntax enable                       "ハイライト表示
+scriptencoding utf-8
 set title                           "タイトル
 set number                          "行番号
 set cursorline                      "カーソルラインの表示
@@ -324,15 +337,17 @@ set laststatus=2
 
 "** カラースキーマ設定 **
 set t_Co=256
-"colorscheme molokai
-"colorscheme hybrid
 colorscheme solarized
+"colorscheme molokai
 "let g:molokai_original=1
 set background=dark
+"hi SpecialKey ctermfg=237 guifg=#3a3a3a
+"hi NonText ctermfg=66 guifg=#5f8787
 
 set tabstop=2                       "タブ文字幅
 set shiftwidth=2                    "インデント幅
 set expandtab                       "タブにスペースを使う
+set smarttab
 set smartindent
 let g:python_highlight_all = 1
 language en_US.UTF-8
@@ -340,8 +355,8 @@ language en_US.UTF-8
 "** ファイル別設定 **
 filetype on
 filetype plugin indent on
-"autocmd BufNewFile *.cpp 0r $HOME/Dropbox/kurokoji/template/cpp.cpp
 autocmd FileType python set tabstop=4 shiftwidth=4 expandtab
 autocmd FileType python set smartindent cinwords=if,elif,else,for,while,try,except,finally,def,class
-autocmd FileType javascript setlocal omnifunc=tern#Complete
+autocmd FileType javascript setlocal smartindent omnifunc=tern#Complete
 autocmd FileType c,cpp set cindent cinoptions+=:0,g0
+autocmd Filetype html setlocal indentexpr="" smartindent
