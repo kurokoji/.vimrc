@@ -1,0 +1,42 @@
+[[plugins]] # toml syntax
+repo = 'cespare/vim-toml'
+on_ft = 'toml'
+
+[[plugins]]
+repo = 'justmao945/vim-clang'
+on_ft = ['c', 'cpp']
+# hook_add {{{
+hook_add = '''
+let g:clang_auto = 0
+let g:clang_complete_auto = 0
+let g:clang_auto_select = 0
+let g:clang_use_library = 1
+let g:clang_c_completeopt = 'menuone,preview,noinsert,noselect'
+let g:clang_cpp_completeopt = 'menuone,preview,noinsert,noselect'
+let g:clang_exec = 'clang++'
+let g:clang_format_exec = 'clang-format'
+let g:clang_c_options = '-std=c11'
+let g:clang_cpp_options = 
+      \ '-std=c++14 -stdlib=libc++ 
+      \ -I/usr/local/Cellar/gcc/6.3.0_1/include/c++/6.3.0/x86_64-apple-darwin16.3.0/
+      \ -I/usr/local/Cellar/gcc/6.3.0_1/include/c++/6.3.0
+      \ -I/usr/local/cellar/boost/1.63.0/include'
+
+'''
+# }}}
+
+[[plugins]]
+repo = 'davidhalter/jedi-vim'
+on_ft = 'python'
+# hook_add {{{
+hook_add = '''
+autocmd FileType python setlocal omnifunc=jedi#completions
+autocmd FileType python setlocal completeopt-=preview
+let g:jedi#force_py_version=3
+let g:jedi#auto_vim_configuration = 1
+if !exists('g:neocomplete#force_omni_input_patterns')
+  let g:neocomplete#force_omni_input_patterns = {}
+endif
+'''
+# }}}
+
